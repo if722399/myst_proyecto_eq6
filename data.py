@@ -1,53 +1,39 @@
 """
 # -- --------------------------------------------------------------------------------------------------- -- #
-# -- project: A SHORT DESCRIPTION OF THE PROJECT                                                         -- #
+# -- project: Technical Analysis                                                                         -- #
 # -- script: data.py : python script for data collection                                                 -- #
-# -- author: YOUR GITHUB USER NAME                                                                       -- #
-# -- license: THE LICENSE TYPE AS STATED IN THE REPOSITORY                                               -- #
-# -- repository: YOUR REPOSITORY URL                                                                     -- #
+# -- author: @Rub27182n | @if722399 | @hectoronate                                                       -- #
+# -- license: TGNU General Public License v3.0                                                           -- #
+# -- repository: https://github.com/Rub27182n/myst_proyecto_eq6.git                                      -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 
-"""
-1) Descargar order books:
-"""
-# Importar Librerias
+# Libraries
+from pathlib import Path
+from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 import pandas as pd
-import json 
-import numpy as np
 
-def order_books(file_name):
-    # Opening JSON file
-    f = open(file_name)
-    print(f)
+#!pip install python-binance pandas mplfinance
 
-    # Returns JSON object as a dictionary
-    orderbooks_data = json.load(f)
-    ob_data = orderbooks_data['bitfinex']
+# Get Binance data
+apikey = 'QddE1UndJCJ48XvSgC6xKZV2tR365sqFCvpdX6mT6xHOcB9a7Ykqu30qyNn8znOe'
+secret = 'kyArU6V1ejdtrZHFpk5CmLpJG1Lk4inAMnoC8hgX53RtK3zDjdUOwV6VH63d6a5B'
+client = Client(apikey, secret)
 
-    # Drop Keys with none values
-    ob_data = {i_key: i_value for i_key,i_value in ob_data.items() if i_value is not None}
+# due to high download times, we stored the info in csv's, here's how we get the data:
+# 1m_data = client.get_historical_klines('BTCUSDT', Client.KLINE_INTERVAL_1MINUTE, '1 Jan 2018')
+# 1m_df = pd.DataFrame(1m_data)
+# 1m_df.columns = ['Open Time', 'Open', 'High', 'Low', 'Close', 'Volume', 'Close Time', 'Quote Asset Volume',
+#                  'Number of Trades', 'TB Base Volume', 'TB Quote Volume', 'Ignore']
+# 1m_df['Open Time'] = pd.to_datetime(1m_df['Open Time']/1000, unit='s')
+# filepath1 = Path('files/BTCUSDT_1d.csv')  
+# filepath1.parent.mkdir(parents=True, exist_ok=True)  
+# 1m_df.to_csv(filepath1)
 
-    # Convert to DataFrame and rearange columns
-    ob_data = {i_ob: pd.DataFrame(ob_data[i_ob])[['bid_size', 'bid', 'ask', 'ask_size']]
-            if ob_data[i_ob] is not None else None for i_ob in list(ob_data.keys())}
-    return ob_data
+BTCUSDT15m = pd.read_csv('files/BTCUSDT_15m.csv')
+BTCUSDT15m.drop(columns=['Unnamed: 0', 'Ignore'], inplace = True)
+BTCUSDT15m['Close Time'] = pd.to_datetime(BTCUSDT15m['Close Time']/1000, unit='s')
 
-# Prueba
-ob_data = order_books('files/orderbooks_05jul21.json')
-#ob_data = order_books('orderbooks_05jul21.json')
+BTCUSDT15m['Open Time'] = BTCUSDT15m['Open Time'].apply(pd.to_datetime)
+BTCUSDT15m['Close Time'] = BTCUSDT15m['Close Time'].apply(pd.to_datetime)
 
-
-def public_trades_metrics(pt_data):
-    # -- Cantida de trades publicos que ocurren en 1 hora -- #
-    #pt_data.drop('Unnamed: 0', inplace=True, axis = 1)
-    a = pd.read_csv(pt_data)
-    a.index = pd.to_datetime(a['timestamp']) # Convertir de str a timestamp
-
-    return a
-
-
-
-names = ['Open time','Open','High','Low','Close','Volume','Close time','Quote asset volume','Number of trades','Taker buy base asset volume','Taker buy quote asset volume','Ignore']
-aave = pd.read_csv('files/AAVE/AAVEUSDT-15m-2022-06-01.csv', names = names)
-aave2 = pd.read_csv('files/AAVE/AAVEUSDT-15m-2022-06-02.csv', names = names)
