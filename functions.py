@@ -12,48 +12,26 @@ import pandas as pd
 import numpy as np
 import pandas_ta as pta
 
-# ----------- Promedio del volumen de los ultimos 14 precios: ----------- #
-
-# v = np.zeros(len(aave))
-# v[:len(aave)-14] = [np.mean(aave.iloc[0:,4][i:i+13]) for i in range(len(aave)-14)]
-# avg_volume = pd.DataFrame({'avg_volume':v})
-
-# ---------- RSI: -----------# 
-
-# diferencias = np.diff(aave.iloc[0:,4][::-1])
-
-
-# RSI = []
-# for i in range(len(diferencias)-14):
-#     subidas = []
-#     bajadas = []
-#     temp = diferencias[i:i+14]
-#     for j in temp:
-#         if j>0:
-#             subidas.append(j)
-#         elif j<0:
-#             bajadas.append(j)
-#         else:
-#             None
-#         m_subidas = np.mean(subidas)
-#         m_bajadas = np.abs(np.mean(bajadas))
-
-#         RS = (m_subidas/m_bajadas)
-#         RSI.append(100 - (100/(1+RS)))
-
-# 1) ¿Qué hacer cuando no hay subidas/bajadas? 
-
-
-
 # -------------- Stochastic RSI -------------- #
 
-# Stoch RSI =  ( RSI - Lowest RSI )   /  ( Max RSI - Lowest RSI)
+def Stoch_RSI(df,n,rsi_name):
 
-# RSI = Current RSI reading
-# Lower RSI = Minimum RSI reading since the last 14 oscillations
-# Max RSI = Maximum RSI reading since the last 14 oscillations
+    ''' Indicator: Relative Strength Index (RSI) '''
+
+    Stoch_RSI_t = []
+    for i in range(len(df[rsi_name])-n):
+        temp = df[rsi_name][i:i+n]
+        L_RSI = np.min(temp)
+        M_RSI = np.max(temp)
+        RSI = temp.values[-1]
+
+        Stoch_RSI_t.append(( RSI - L_RSI )   /  ( M_RSI - L_RSI))
 
 
+    Stoch_RSI =  np.zeros(len(df))
+    Stoch_RSI[n:] = np.array(Stoch_RSI_t)*100
+
+    return Stoch_RSI
 
 #------------------------------VWAP--------------------------------------
 def vwap(high, low, close, volume, anchor=None, offset=None, **kwargs):
