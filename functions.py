@@ -198,3 +198,32 @@ def pivots(_open, high, low, close, anchor=None, method=None):
     return pivots_df
 
 
+#----------------------------- EMA200 & Signal ---------------------------------
+
+def EMA200_Signal(df)-> dict:
+
+    # -------Calculate EMA200 Metric: -------
+    df['EMA200'] = pta.ema(df.Close, length = 200)
+
+
+
+    # -------Generate the signal: -------
+    emasignal = [0]*len(df)
+    backcandles = 8
+
+    for j in range(backcandles-1,len(df)):
+        upt = 1
+        dnt = 1
+        for i in range(j-backcandles,j+1):
+            if df.High[j]>= df.EMA200[j]:
+                dnt = 0
+            if df.Low[j]<= df.EMA200[j]:
+                upt = 0
+        if upt == 1 and dnt == 1:
+            emasignal[j] = 3
+        elif upt == 1:
+            emasignal[j] = 2
+        elif dnt == 1:
+            emasignal[j] = 1
+
+    return {'EMA200':df['EMA200'],'EMA200_Signal':emasignal}
