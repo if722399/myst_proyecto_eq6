@@ -205,3 +205,33 @@ def EMA200_Signal(df)-> dict:
             emasignal[j] = 1
 
     return {'EMA200':df['EMA200'],'EMA200_Signal':emasignal}
+
+
+    #----------------------------- Total Signal ------------------------------#
+
+def TotSignal(df)-> 'List':
+    
+    ''' The input df must have columns with the RSI and the EMA200 signals'''
+
+    TotSignal = [0] * len(df)
+    for i in range(len(df)):
+        TotSignal[i] = 0
+        if df.EMA_Signal[i] == 1 and df.RSI[i] >= 70:
+            TotSignal[i] = 1
+        if df.EMA_Signal[i] == 2 and df.RSI[i] <= 30:
+            TotSignal[i] = 2
+
+    return TotSignal
+
+#----------------------------- Point Positions ------------------------------#
+
+def pointpos(x):
+
+    ''' This function was created for visualizations purposes'''
+
+    if x['TotSignal'] == 1:
+        return x['High'] + 50
+    elif x['TotSignal'] == 2:
+        return x['Low'] - 50
+    else: 
+        return np.nan
