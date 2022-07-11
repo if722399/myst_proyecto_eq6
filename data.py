@@ -9,16 +9,16 @@
 """
 
 # Libraries
-from pathlib import Path
-from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
+# from pathlib import Path
+# from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 import pandas as pd
 
 #!pip install python-binance pandas mplfinance
 
 # Get Binance data
-apikey = 'QddE1UndJCJ48XvSgC6xKZV2tR365sqFCvpdX6mT6xHOcB9a7Ykqu30qyNn8znOe'
-secret = 'kyArU6V1ejdtrZHFpk5CmLpJG1Lk4inAMnoC8hgX53RtK3zDjdUOwV6VH63d6a5B'
-client = Client(apikey, secret)
+# apikey = 'QddE1UndJCJ48XvSgC6xKZV2tR365sqFCvpdX6mT6xHOcB9a7Ykqu30qyNn8znOe'
+# secret = 'kyArU6V1ejdtrZHFpk5CmLpJG1Lk4inAMnoC8hgX53RtK3zDjdUOwV6VH63d6a5B'
+# client = Client(apikey, secret)
 
 # due to high download times, we stored the info in csv's, here's how we get the data:
 # 1m_data = client.get_historical_klines('BTCUSDT', Client.KLINE_INTERVAL_1MINUTE, '1 Jan 2018')
@@ -31,9 +31,8 @@ client = Client(apikey, secret)
 # 1m_df.to_csv(filepath1)
 
 BTCUSDT15m = pd.read_csv('files/BTCUSDT_15m.csv')
-BTCUSDT15m.drop(columns=['Unnamed: 0', 'Ignore'], inplace = True)
-BTCUSDT15m['Close Time'] = pd.to_datetime(BTCUSDT15m['Close Time']/1000, unit='s')
+BTCUSDT15m.drop(columns=['Unnamed: 0', 'Ignore', 'Close Time','Quote Asset Volume', 
+                         'Number of Trades', 'TB Base Volume','TB Quote Volume'], inplace = True)
 
 BTCUSDT15m['Open Time'] = BTCUSDT15m['Open Time'].apply(pd.to_datetime)
-BTCUSDT15m['Close Time'] = BTCUSDT15m['Close Time'].apply(pd.to_datetime)
 

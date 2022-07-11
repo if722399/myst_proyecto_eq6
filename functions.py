@@ -107,7 +107,7 @@ def pivots(_open, high, low, close, anchor=None, method=None):
         a["s1"] = a.p.values - 0.382 * a.pivot_range.values
         a["s2"] = a.p.values - 0.618 * a.pivot_range.values
         a["s3"] = a.p.values - 1 * a.pivot_range.values
-        a["r1"] = a.p.values + 0.382 * a.pivot_range.values
+        a["r1"] = a.p.values + 0.618 * a.pivot_range.values
         a["r2"] = a.p.values + 0.382 * a.pivot_range.values
         a["r3"] = a.p.values + 1 * a.pivot_range.values
         a.drop(["pivot_range"], axis=1, inplace=True)
