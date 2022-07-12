@@ -235,3 +235,70 @@ def pointpos(x):
         return x['Low'] - 50
     else: 
         return np.nan
+
+#----------------------------- Final strategy function ------------------------------#
+
+
+
+def final_strategy(data,ema_length,rsi_length,n_months=30,initial_cash=1000000,commission=.00):
+
+    ''' This is the function which will test our trading strategy
+    
+    Metrics: RSI, EMA200
+    
+    '''
+
+    # get the ema signal 
+    data['EMA'] = pta.ema(data.Close, length = ema_length)
+    temp = data['EMA']>data.Close
+    data['EMA_Signal'] = temp.rolling(8).sum() >= 8 
+    data['EMA_Signal'] = data['EMA_Signal'].replace({True: 2, False: 1})
+
+    # get the rsi
+    data['RSI'] = pta.rsi(data.Close, length = rsi_length)
+
+    # get ATR
+    data['ATR'] = pta.atr(data['High'],data['Low'],data['Close'])
+    
+    #get TotSignal
+    data['TotSignal'] = fn.TotSignal(data)
+
+    data.dropna(inplace=True)
+    
+    # Select period of time 
+    months = 24*4*30
+    startid = 0
+    data.set_index("Open Time", inplace=True)
+    dfpl = data[startid:startid+n_months*months]
+
+
+    def SIGNAL():
+        return dfpl.TotSignal
+    
+    
+    class MyStrat(Strategy):
+        initsize = .1
+        mysize = initsize
+        def init(self):
+            super().init()
+            self.signal1 = self.I(SIGNAL)
+
+        def next(self):
+            super().next()
+            slatr = self.data.ATR[-1]
+            TPSLRatio = 1.5
+
+            if self.signal1 == 2 and len(self.trades)==0:
+                sl1 = self.data.Close[-1] - slatr
+                tp1 = self.data.Close[-1] + slatr*TPSLRatio
+                self.buy(sl=sl1, tp=tp1,size=self.mysize)
+
+            elif self.signal1 == 1 and len(self.trades)==0:
+                sl1 = self.data.Close[-1] + slatr
+                tp1 = self.data.Close[-1] - slatr*TPSLRatio
+                self.sell(sl = sl1, tp=tp1,size=self.mysize)
+
+     
+    bt = Backtest(dfpl, MyStrat, cash=initial_cash, commission=commission)
+    stat = bt.run()
+    return stat
